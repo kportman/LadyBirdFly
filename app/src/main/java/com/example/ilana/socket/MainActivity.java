@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 public class MainActivity extends Activity{
 
@@ -20,7 +21,7 @@ public class MainActivity extends Activity{
 
 
 
-        Button send = (Button) findViewById(R.id.send_button);//Connect button
+        ImageButton send = (ImageButton) findViewById(R.id.send_button);//Connect button
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override

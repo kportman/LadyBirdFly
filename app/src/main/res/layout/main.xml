@@ -29,11 +29,12 @@
         android:id="@+id/insert_port"
         android:hint="inser port:" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageButton
+        android:layout_width="110dp"
+        android:layout_height="101dp"
         android:id="@+id/send_button"
-        android:text="@string/Connect"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/go"
+        android:layout_marginTop="50dp" />
 
 </LinearLayout>

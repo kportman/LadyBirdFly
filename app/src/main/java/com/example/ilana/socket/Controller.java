@@ -1,5 +1,6 @@
 package com.example.ilana.socket;
 
+import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,6 +11,7 @@ import android.app.Activity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.Timer;
@@ -29,6 +31,8 @@ public class Controller extends Activity implements SensorEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_controller);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
 
         //Get ip and port from MainActivity
         Bundle i = getIntent().getExtras();
@@ -50,7 +54,7 @@ public class Controller extends Activity implements SensorEventListener {
         acceleration = (TextView) findViewById(R.id.acceleration);
 
         //Buttons
-        final Button upButton = (Button) this.findViewById(R.id.up);
+        final ImageButton upButton = (ImageButton) this.findViewById(R.id.up);
         upButton.setOnTouchListener(new View.OnTouchListener() {
 
 
@@ -69,7 +73,7 @@ public class Controller extends Activity implements SensorEventListener {
             }
         });
 
-        final Button downButton = (Button) this.findViewById(R.id.down);
+        final ImageButton downButton = (ImageButton) this.findViewById(R.id.down);
         downButton.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -105,8 +109,7 @@ public class Controller extends Activity implements SensorEventListener {
 
             //count++;
             acceleration.setText("X: " + event.values[0] +
-                    "\nY: " + event.values[1] +
-                    "\nZ: " + event.values[2]);
+                    "\nY: " + event.values[1]);
 
             int x = calcX(event) * NORMALAIZE;
             int y = calcY(event) * NORMALAIZE;
