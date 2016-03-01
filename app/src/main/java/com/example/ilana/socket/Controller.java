@@ -5,26 +5,29 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.Timer;
 
 public class Controller extends Activity implements SensorEventListener {
+    /*initialization*/
     Sensor accelerometer;
     SensorManager sm;
     TextView acceleration;
     final static int NORMALAIZE = 5;
     final Object lock = new Object();
-    //Integer count = 0;
     double startTime = System.currentTimeMillis();
     double delay =0;
+    double boundaryYbottom = 4.5;
+    double boundaryYup = 5.5;
+    double boundaryXbottom = -1;
+    double boundaryXup = 1;
+    /*Control the amount of messages in a certain period*/
+    int delayTimer = 1000;
 
 
     @Override
@@ -33,12 +36,10 @@ public class Controller extends Activity implements SensorEventListener {
         setContentView(R.layout.activity_controller);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-
         //Get ip and port from MainActivity
         Bundle i = getIntent().getExtras();
         String ip = i.getString("ip");
         String port = i.getString("port");
-
 
         //Open tcp socket
         new ConnectTask(ip, port).execute("");
@@ -46,14 +47,14 @@ public class Controller extends Activity implements SensorEventListener {
             return;
         }
 
-        //gyro conficuration
+        //gyro configuration
         sm = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sm.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         acceleration = (TextView) findViewById(R.id.acceleration);
 
-        //Buttons
+        /*Up button*/
         final ImageButton upButton = (ImageButton) this.findViewById(R.id.up);
         upButton.setOnTouchListener(new View.OnTouchListener() {
 
@@ -61,45 +62,29 @@ public class Controller extends Activity implements SensorEventListener {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 final int z = 10;
-                // PRESSED
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-
+                /*Sending a command that influence z axis - up*/
                     ConnectTask.mTcpClient.sendMessage("moveby 0 0 " + z + "\n");
-
                 }
                 return true;
-
             }
         });
 
+        /*Down button*/
         final ImageButton downButton = (ImageButton) this.findViewById(R.id.down);
         downButton.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 final int z = -10;
-                // PRESSED
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
+                    /*Sending a command that influence z axis - down*/
                     ConnectTask.mTcpClient.sendMessage("moveby 0 0 " + z + "\n");
                 }
                 return true;
             }
         });
     }
-
-    // up button
-
-       /* String str = "moveby 0 -200 0\n";
-        byte[] buf;
-        try {
-            buf = str.getBytes("UTF-8");
-            ConnectTask.mTcpClient.sendMessage(buf);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }*/
-
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -107,60 +92,53 @@ public class Controller extends Activity implements SensorEventListener {
             delay = System.currentTimeMillis() - startTime;
             System.out.println(delay);
 
-            //count++;
+            /*Handling with accelerometer*/
             acceleration.setText("X: " + event.values[0] +
                     "\nY: " + event.values[1]);
 
+            /*Calculate the value that x and y should be for sending to the server */
             int x = calcX(event) * NORMALAIZE;
             int y = calcY(event) * NORMALAIZE;
 
-
-        if(delay < 1000) {return;}
+        /*Handling with timer*/
+        if(delay < delayTimer) {return;}
             else {
             delay = 0;
             startTime = System.currentTimeMillis();
 
+            /*Sending the command*/
             ConnectTask.mTcpClient.sendMessage("moveby " + x + " " + y + " 0\n");
             return;
         }
-
-
-
     }
-
 }
-
-
-
-
         @Override
         public void onAccuracyChanged (Sensor sensor,int accuracy){
 
     }
 
-
+    /*Calc y axis*/
     public int calcY(SensorEvent event) {
-        int y = (int)event.values[0] ;
-        if (y > 5.5) {
-            y = (y - 5) * 4;
+        int y = (int)event.values[0] ; /* y get the value from the accelerometer */
+        if (y > boundaryYup) {
+            y = (y - 5) * 4;/*Calculation of growth of y*/
             return -y;
-        } else if (y < 4.5) {
-           // y += -10;
+        } else if (y < boundaryYbottom) {
             return -y;
         } else {
             return 0;
         }
     }
 
+    /*Calc x axis*/
     public int calcX(SensorEvent event) {
-        int x = (int)event.values[1];
-        if (x > 1 || x < -1) {
-            x *= 2;
+        int x = (int)event.values[1]; /*x get the value from the accelerometer*/
+        if (x > boundaryXup || x < boundaryXbottom) {
+            x *= 2; /*Calculation of growth of x */
             return x;
         } else {
             return 0;
         }
     }
-
 }
 
